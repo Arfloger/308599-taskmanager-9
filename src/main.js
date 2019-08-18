@@ -1,9 +1,9 @@
 import {getRandomValue} from "../src/utils";
-import {getTask} from "../src/data.js";
+import {getTask, getFilter} from "../src/data.js";
 
 import {createSiteMenuTemplate} from "../src/components/site-menu.js";
 import {createSiteSearchTemplate} from "../src/components/site-search.js";
-import {createSiteFilterTemplate} from "../src/components/site-filter.js";
+import {createFilterTemplate} from "../src/components/site-filter.js";
 import {createSiteCardEditTemplate} from "../src/components/site-card-edit.js";
 import {createCardTemplate} from "../src/components/site-card.js";
 import {createLoadMoreTemplate} from "../src/components/site-load-more.js";
@@ -46,9 +46,17 @@ const showTasks = (insertPlace, tasksArr) => {
   LEFT_CARDS_TO_RENDER = tasks.length - TASKS_ON_PAGE;
 
   if (LEFT_CARDS_TO_RENDER <= 0) {
-    loadMoreButton.style.display = `none`;
+    loadMoreButton.classList.add(`visually-hidden`);
     loadMoreButton.removeEventListener(`click`, onLoadMoreButtonClick);
   }
+};
+
+const renderFilters = (container) => {
+  container.insertAdjacentHTML(`beforeend`, new Array(1)
+    .fill(``)
+    .map(getFilter)
+    .map(createFilterTemplate)
+    .join(``));
 };
 
 const createBoardElelement = () => {
@@ -67,7 +75,8 @@ const createBoardElelement = () => {
 const init = () => {
   renderElement(menuElement, createSiteMenuTemplate);
   renderElement(mainElement, createSiteSearchTemplate);
-  renderElement(mainElement, createSiteFilterTemplate);
+  renderFilters(mainElement);
+  // renderElement(mainElement, createFilterTemplate);
 
   createBoardElelement();
 };

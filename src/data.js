@@ -20,3 +20,8 @@ export const getTask = () => ({
   isFavorite: Boolean(Math.round(Math.random())),
   isArchive: Boolean(Math.round(Math.random())),
 });
+
+export const getFilter = () => ({
+  titles: [`all`, `overdue`, `today`, `favorites`, `repeating`, `tags`, `archive`],
+  counts: [8, 922, 911, 24, 5, 6, 13],
+});
