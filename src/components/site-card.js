@@ -1,7 +1,8 @@
-export const createCardTemplate = ({description, dueDate, tags, color}) => {
+import {getRandomValue, compareRandom} from "../utils.js";
 
+export const createCardTemplate = ({description, dueDate, tags, color}) => {
   return `
-  <article class="card card--${color}${dueDate > Date.now() ? ` card--deadline` : ``}">
+  <article class="card card--${color}${dueDate < Date.now() ? ` card--deadline` : ``}">
       <div class="card__form">
         <div class="card__inner">
           <div class="card__control">
@@ -41,11 +42,11 @@ export const createCardTemplate = ({description, dueDate, tags, color}) => {
 
               <div class="card__hashtag">
                 <div class="card__hashtag-list">
-                ${Array.from(tags).map((tag) => `<span class="card__hashtag-inner">
-                <span class="card__hashtag-name">
+                ${Array.from(tags).sort(compareRandom).splice(0, getRandomValue(4)).map((tag) => `<span class="card__hashtag-inner">
+                  <span class="card__hashtag-name">
                   #${tag}
-                </span>
-              </span>`).join(``)}
+                  </span>
+                  </span>`).join(``)}
                 </div>
               </div>
             </div>
