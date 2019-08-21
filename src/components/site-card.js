@@ -1,8 +1,10 @@
 import {getRandomValue, compareRandom} from "../utils.js";
 
 export const createCardTemplate = ({description, dueDate, tags, color}) => {
+  const today = new Date().toLocaleDateString();
+
   return `
-  <article class="card card--${color}${dueDate < Date.now() ? ` card--deadline` : ``}">
+  <article class="card card--${color}${new Date(dueDate).toLocaleDateString() < today ? ` card--deadline` : ``}">
       <div class="card__form">
         <div class="card__inner">
           <div class="card__control">

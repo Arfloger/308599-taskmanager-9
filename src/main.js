@@ -9,8 +9,8 @@ import {createLoadMoreTemplate} from "../src/components/site-load-more.js";
 
 const MAX_SHOW = 8;
 // здесь необходим let, потому что в функции showTasks перезаписываются переменные, возникает ошибка типа
-let TASKS_ON_PAGE = MAX_SHOW;
-let QUANTITY_CARD = 25;
+let TASKS_ON_PAGE = 0;
+let QUANTITY_CARD = 16;
 
 const menuElement = document.querySelector(`.main__control`);
 const mainElement = document.querySelector(`.main`);
@@ -65,14 +65,19 @@ const showTasks = (insertPlace, tasksArr) => {
 
 const getFilterCounts = (taskArr, filterArr) => {
   const currentDate = new Date();
-  const todayDate = new Date().getDay();
+  const today = new Date().toLocaleDateString();
 
   taskArr.forEach((task) => {
-    let taskDay = new Date(task.dueDate).getDay();
+    let taskDay = new Date(task.dueDate).toLocaleDateString();
 
     filterArr.overdue = task.dueDate < currentDate ? filterArr.overdue += 1 : filterArr.overdue;
 
-    filterArr.today = taskDay === todayDate ? filterArr.today += 1 : filterArr.today;
+    filterArr.today = taskDay === today ? filterArr.today += 1 : filterArr.today;
+
+    filterArr.favorites = task.isFavorite === true ? filterArr.favorites += 1 : filterArr.favorites;
+
+    filterArr.archive = task.isArchive === true ? filterArr.archive += 1 : filterArr.archive;
+
   });
 
   return filterArr;
