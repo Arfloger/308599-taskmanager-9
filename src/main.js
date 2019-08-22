@@ -1,17 +1,13 @@
 import {getTask} from "../src/data.js";
-
-import {createSiteMenuTemplate} from "../src/components/site-menu.js";
-import {createSiteSearchTemplate} from "../src/components/site-search.js";
+import {createMenuTemplate} from "../src/components/site-menu.js";
+import {createSearchTemplate} from "../src/components/site-search.js";
 import {getFilters} from "../src/components/site-filter.js";
-import {createSiteCardEditTemplate} from "../src/components/site-card-edit.js";
+import {createCardEditTemplate} from "../src/components/site-card-edit.js";
 import {createCardTemplate} from "../src/components/site-card.js";
 import {createLoadMoreTemplate} from "../src/components/site-load-more.js";
 
-const MAX_SHOW = 8;
-// здесь необходим let, потому что в функции showTasks перезаписываются переменные, возникает ошибка типа
-let TASKS_ON_PAGE = 0;
-let QUANTITY_CARD = 16;
-
+const MAX_CARD_TO_SHOW = 8;
+const QUANTITY_CARD = 16;
 const menuElement = document.querySelector(`.main__control`);
 const mainElement = document.querySelector(`.main`);
 const boardElement = document.createElement(`section`);
@@ -25,6 +21,8 @@ const filters = {
   tags: 0,
   archive: 0,
 };
+let tasksOnPage = 0;
+let leftCardsToRender = 0;
 
 const renderElement = (insertPlace, callback) => {
   insertPlace.insertAdjacentHTML(`beforeend`, callback());
@@ -38,11 +36,11 @@ const createTasks = (count) => {
   return currentTasks;
 };
 
-const tasks = createTasks(QUANTITY_CARD);
-let LEFT_CARDS_TO_RENDER = tasks.length - TASKS_ON_PAGE;
-
-const onLoadMoreButtonClick = () => {
-  showTasks(boardTasksElement, tasks);
+const showEditTask = (insertPlace, tasksArr) => {
+  insertPlace.insertAdjacentHTML(
+      `beforeend`,
+      createCardEditTemplate(tasksArr[0])
+  );
 };
 
 const showTasks = (insertPlace, tasksArr) => {
@@ -50,14 +48,14 @@ const showTasks = (insertPlace, tasksArr) => {
       `beforeend`,
       tasksArr
       .map(createCardTemplate)
-      .slice(TASKS_ON_PAGE, TASKS_ON_PAGE + MAX_SHOW)
+      .slice(tasksOnPage, tasksOnPage + MAX_CARD_TO_SHOW)
       .join(``)
   );
 
-  TASKS_ON_PAGE += MAX_SHOW;
-  LEFT_CARDS_TO_RENDER = tasks.length - TASKS_ON_PAGE;
+  tasksOnPage += MAX_CARD_TO_SHOW;
+  leftCardsToRender = QUANTITY_CARD - tasksOnPage;
 
-  if (LEFT_CARDS_TO_RENDER <= 0) {
+  if (leftCardsToRender <= 0) {
     loadMoreButtonElement.classList.add(`visually-hidden`);
     loadMoreButtonElement.removeEventListener(`click`, onLoadMoreButtonClick);
   }
@@ -76,19 +74,20 @@ const getFilterCounts = (taskArr, filterArr) => {
 
     filterArr.favorites = task.isFavorite === true ? filterArr.favorites += 1 : filterArr.favorites;
 
-    filterArr.archive = task.isArchive === true ? filterArr.archive += 1 : filterArr.archive;
+    filterArr.tags = Array.from(task.tags).length !== 0 ? filterArr.tags += 1 : filterArr.tags;
 
+    filterArr.repeating = Object.values(task.repeatingDays).indexOf(true) !== -1 ? filterArr.repeating += 1 : filterArr.repeating;
+
+    filterArr.archive = task.isArchive === true ? filterArr.archive += 1 : filterArr.archive;
   });
 
   return filterArr;
 };
 
-const currentCountFilters = getFilterCounts(tasks, filters);
-
-const renderFilters = (container) => {
+const renderFilters = (container, countFilterArr) => {
   let convertFilters = [];
 
-  for (let [key, value] of Object.entries(currentCountFilters)) {
+  for (let [key, value] of Object.entries(countFilterArr)) {
     convertFilters.push({
       title: key,
       count: value
@@ -104,22 +103,28 @@ const createBoardElelement = () => {
 
   boardTasksElement.classList.add(`board__tasks`);
   boardElement.appendChild(boardTasksElement);
-
-  renderElement(boardTasksElement, createSiteCardEditTemplate);
-  showTasks(boardTasksElement, tasks);
-  renderElement(boardElement, createLoadMoreTemplate);
 };
 
 const init = () => {
-  renderElement(menuElement, createSiteMenuTemplate);
-  renderElement(mainElement, createSiteSearchTemplate);
+  const tasks = createTasks(QUANTITY_CARD);
+  const currentCountFilters = getFilterCounts(tasks, filters);
+  const onLoadMoreButtonClick = () => {
+    showTasks(boardTasksElement, tasks);
+  };
+  leftCardsToRender = tasks.length - tasksOnPage;
 
-  renderFilters(mainElement);
+  renderElement(menuElement, createMenuTemplate);
+  renderElement(mainElement, createSearchTemplate);
+
+  renderFilters(mainElement, currentCountFilters);
   createBoardElelement();
+
+  showEditTask(boardTasksElement, tasks);
+  showTasks(boardTasksElement, tasks);
+  renderElement(boardElement, createLoadMoreTemplate);
+
+  const loadMoreButtonElement = document.querySelector(`.load-more`);
+  loadMoreButtonElement.addEventListener(`click`, onLoadMoreButtonClick);
 };
 
 init();
-
-// не могу поместить ее выше, потому что она создается динамически после вызова функции
-const loadMoreButtonElement = document.querySelector(`.load-more`);
-loadMoreButtonElement.addEventListener(`click`, onLoadMoreButtonClick);

@@ -28,20 +28,20 @@ const DURATION = {
   MILLISECONDS_IN_SECOND: 1000,
 };
 
-const TIMESTAMP_DAY = DURATION.HOURS_IN_DAY * DURATION.MINUTES_IN_HOUR * DURATION.SECONDS_IN_MINUTE * DURATION.MILLISECONDS_IN_SECOND;
+const timestampDay = DURATION.HOURS_IN_DAY * DURATION.MINUTES_IN_HOUR * DURATION.SECONDS_IN_MINUTE * DURATION.MILLISECONDS_IN_SECOND;
 
 export const getTask = () => ({
   description: DESCRIPTIONS[Math.floor(Math.random() * 3)],
   dueDate:
-      Date.now() + 1 + Math.floor(Math.random() * (DURATION.DAY_IN_WEEK + DURATION.DAY_IN_WEEK)) * TIMESTAMP_DAY - (DURATION.DAY_IN_WEEK * DURATION.HOURS_IN_DAY * DURATION.MINUTES_IN_HOUR * DURATION.SECONDS_IN_MINUTE * DURATION.MILLISECONDS_IN_SECOND),
+      Date.now() + 1 + Math.floor(Math.random() * (DURATION.DAY_IN_WEEK + DURATION.DAY_IN_WEEK)) * timestampDay - (DURATION.DAY_IN_WEEK * DURATION.HOURS_IN_DAY * DURATION.MINUTES_IN_HOUR * DURATION.SECONDS_IN_MINUTE * DURATION.MILLISECONDS_IN_SECOND),
   repeatingDays: {
     'mo': Boolean(Math.round(Math.random())),
     'tu': Boolean(Math.round(Math.random())),
     'we': Boolean(Math.round(Math.random())),
     'th': Boolean(Math.round(Math.random())),
     'fr': Boolean(Math.round(Math.random())),
-    'sa': Boolean(Math.round(Math.random())),
-    'su': Boolean(Math.round(Math.random())),
+    'sa': false,
+    'su': false,
   },
   tags: new Set(TAGS),
   color: COLORS[Math.floor(Math.random() * 5)],

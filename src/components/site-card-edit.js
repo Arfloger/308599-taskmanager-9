@@ -1,6 +1,6 @@
-export const createSiteCardEditTemplate = () => {
+export const createCardEditTemplate = ({description, color}) => {
   return `
-    <article class="card card--edit card--black">
+    <article class="card card--edit card--${color}">
     <form class="card__form" method="get">
     <div class="card__inner">
         <div class="card__control">
@@ -20,7 +20,7 @@ export const createSiteCardEditTemplate = () => {
 
         <div class="card__textarea-wrap">
         <label>
-            <textarea class="card__text" placeholder="Start typing your text here..." name="text">This is example of new task, you can add picture, set date and time, add tags.</textarea>
+            <textarea class="card__text" placeholder="${description}" name="text">${description}</textarea>
         </label>
         </div>
 
