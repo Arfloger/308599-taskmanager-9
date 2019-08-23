@@ -72,13 +72,13 @@ const getFilterCounts = (taskArr, filterArr) => {
 
     filterArr.today = taskDay === today ? filterArr.today += 1 : filterArr.today;
 
-    filterArr.favorites = task.isFavorite === true ? filterArr.favorites += 1 : filterArr.favorites;
+    filterArr.favorites = task.isFavorite ? filterArr.favorites += 1 : filterArr.favorites;
 
     filterArr.tags = Array.from(task.tags).length !== 0 ? filterArr.tags += 1 : filterArr.tags;
 
     filterArr.repeating = Object.values(task.repeatingDays).indexOf(true) !== -1 ? filterArr.repeating += 1 : filterArr.repeating;
 
-    filterArr.archive = task.isArchive === true ? filterArr.archive += 1 : filterArr.archive;
+    filterArr.archive = task.isArchive ? filterArr.archive += 1 : filterArr.archive;
   });
 
   return filterArr;
