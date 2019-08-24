@@ -1,65 +1,42 @@
-import {getTask} from "../src/data.js";
-import {createMenuTemplate} from "../src/components/site-menu.js";
-import {createSearchTemplate} from "../src/components/site-search.js";
-import {getFilters} from "../src/components/site-filter.js";
-import {createCardEditTemplate} from "../src/components/site-card-edit.js";
-import {createCardTemplate} from "../src/components/site-card.js";
-import {createLoadMoreTemplate} from "../src/components/site-load-more.js";
+import {Position, render} from "./utils.js";
 
-const MAX_CARD_TO_SHOW = 8;
+import Menu from "../src/components/menu.js";
+import Search from "../src/components/search.js";
+import Filter from "../src/components/filter.js";
+import Task from "./components/card.js";
+import TaskEdit from "./components/card-edit.js";
+import LoadMore from "./components/load-more.js";
+import {getTask} from "../src/data.js";
+
+
+// const MAX_CARD_TO_SHOW = 8;
 const QUANTITY_CARD = 16;
 const menuElement = document.querySelector(`.main__control`);
 const mainElement = document.querySelector(`.main`);
 const boardElement = document.createElement(`section`);
 const boardTasksElement = document.createElement(`div`);
-const filters = {
-  all: QUANTITY_CARD,
-  overdue: 0,
-  today: 0,
-  favorites: 0,
-  repeating: 0,
-  tags: 0,
-  archive: 0,
-};
-let tasksOnPage = 0;
-let leftCardsToRender = 0;
+let tasksContainer;
+// let tasksOnPage = 0;
+// let leftCardsToRender = 0;
 
-const renderElement = (insertPlace, callback) => {
-  insertPlace.insertAdjacentHTML(`beforeend`, callback());
-};
 
-const createTasks = (count) => {
-  const currentTasks = [];
-  for (let i = 0; i < count; i++) {
-    currentTasks.push(getTask());
-  }
-  return currentTasks;
-};
+// const showTasks = (insertPlace, tasksArr) => {
+//   insertPlace.insertAdjacentHTML(
+//       `beforeend`,
+//       tasksArr
+//       .map(createCardTemplate)
+//       .slice(tasksOnPage, tasksOnPage + MAX_CARD_TO_SHOW)
+//       .join(``)
+//   );
 
-const showEditTask = (insertPlace, tasksArr) => {
-  insertPlace.insertAdjacentHTML(
-      `beforeend`,
-      createCardEditTemplate(tasksArr[0])
-  );
-};
+//   tasksOnPage += MAX_CARD_TO_SHOW;
+//   leftCardsToRender = QUANTITY_CARD - tasksOnPage;
 
-const showTasks = (insertPlace, tasksArr) => {
-  insertPlace.insertAdjacentHTML(
-      `beforeend`,
-      tasksArr
-      .map(createCardTemplate)
-      .slice(tasksOnPage, tasksOnPage + MAX_CARD_TO_SHOW)
-      .join(``)
-  );
-
-  tasksOnPage += MAX_CARD_TO_SHOW;
-  leftCardsToRender = QUANTITY_CARD - tasksOnPage;
-
-  if (leftCardsToRender <= 0) {
-    loadMoreButtonElement.classList.add(`visually-hidden`);
-    loadMoreButtonElement.removeEventListener(`click`, onLoadMoreButtonClick);
-  }
-};
+//   if (leftCardsToRender <= 0) {
+//     loadMoreButtonElement.classList.add(`visually-hidden`);
+//     loadMoreButtonElement.removeEventListener(`click`, onLoadMoreButtonClick);
+//   }
+// };
 
 const getFilterCounts = (taskArr, filterArr) => {
   const currentDate = new Date();
@@ -84,17 +61,43 @@ const getFilterCounts = (taskArr, filterArr) => {
   return filterArr;
 };
 
-const renderFilters = (container, countFilterArr) => {
-  let convertFilters = [];
+const renderFilter = () => {
+  const filtersList = {
+    all: QUANTITY_CARD,
+    overdue: 0,
+    today: 0,
+    favorites: 0,
+    repeating: 0,
+    tags: 0,
+    archive: 0,
+  };
+  const currentCountFilters = getFilterCounts(taskMocks, filtersList);
+  const filters = [];
 
-  for (let [key, value] of Object.entries(countFilterArr)) {
-    convertFilters.push({
+  for (let [key, value] of Object.entries(currentCountFilters)) {
+    filters.push({
       title: key,
       count: value
     });
   }
 
-  container.insertAdjacentHTML(`beforeend`, getFilters(convertFilters));
+  const filter = new Filter(filters);
+  render(mainElement, filter.getElement(), Position.BEFOREEND);
+};
+
+const renderSearch = () => {
+  const search = new Search();
+  render(mainElement, search.getElement(), Position.BEFOREEND);
+};
+
+const renderMenu = () => {
+  const menu = new Menu();
+  render(menuElement, menu.getElement(), Position.BEFOREEND);
+};
+
+const renderLoadMore = () => {
+  const loadMore = new LoadMore();
+  render(boardElement, loadMore.getElement(), Position.BEFOREEND);
 };
 
 const createBoardElelement = () => {
@@ -105,26 +108,64 @@ const createBoardElelement = () => {
   boardElement.appendChild(boardTasksElement);
 };
 
-const init = () => {
-  const tasks = createTasks(QUANTITY_CARD);
-  const currentCountFilters = getFilterCounts(tasks, filters);
-  const onLoadMoreButtonClick = () => {
-    showTasks(boardTasksElement, tasks);
+const renderTask = (taskMock) => {
+  const task = new Task(taskMock);
+  const taskEdit = new TaskEdit(taskMock);
+
+  const onEscKeyDown = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      tasksContainer.replaceChild(task.getElement(), taskEdit.getElement());
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
   };
-  leftCardsToRender = tasks.length - tasksOnPage;
 
-  renderElement(menuElement, createMenuTemplate);
-  renderElement(mainElement, createSearchTemplate);
+  task.getElement()
+    .querySelector(`.card__btn--edit`)
+    .addEventListener(`click`, () => {
+      tasksContainer.replaceChild(taskEdit.getElement(), task.getElement());
+    });
 
-  renderFilters(mainElement, currentCountFilters);
+  taskEdit.getElement().querySelector(`textarea`).
+  addEventListener(`focus`, () => {
+    document.removeEventListener(`keydown`, onEscKeyDown);
+  });
+
+  taskEdit.getElement().querySelector(`textarea`).
+  addEventListener(`blur`, () => {
+    document.addEventListener(`keydown`, onEscKeyDown);
+  });
+
+  taskEdit.getElement()
+  .querySelector(`.card__save`)
+  .addEventListener(`click`, () => {
+    tasksContainer.replaceChild(task.getElement(), taskEdit.getElement());
+    document.removeEventListener(`keydown`, onEscKeyDown);
+  });
+
+  render(tasksContainer, task.getElement(), Position.BEFOREEND);
+};
+
+const taskMocks = new Array(QUANTITY_CARD).fill(``).map(getTask);
+
+const init = () => {
+  renderMenu();
+  renderSearch();
+  renderFilter();
   createBoardElelement();
+  tasksContainer = document.querySelector(`.board__tasks`);
+  taskMocks.forEach((taskMock) => renderTask(taskMock));
+  renderLoadMore();
 
-  showEditTask(boardTasksElement, tasks);
-  showTasks(boardTasksElement, tasks);
-  renderElement(boardElement, createLoadMoreTemplate);
+  // const onLoadMoreButtonClick = () => {
+  // showTasks(boardTasksElement, tasks);
+  // };
+  // leftCardsToRender = tasks.length - tasksOnPage;
+  // showEditTask(boardTasksElement, tasks);
+  // showTasks(boardTasksElement, tasks);
+  // renderElement(boardElement, createLoadMoreTemplate);
 
-  const loadMoreButtonElement = document.querySelector(`.load-more`);
-  loadMoreButtonElement.addEventListener(`click`, onLoadMoreButtonClick);
+  // const loadMoreButtonElement = document.querySelector(`.load-more`);
+  // loadMoreButtonElement.addEventListener(`click`, onLoadMoreButtonClick);
 };
 
 init();
