@@ -19,9 +19,23 @@ export default class Task {
     return this._element;
   }
 
+  getHashtegs() {
+    const hashtegs = Array.from(this._tags).sort(compareRandom).splice(0, getRandomValue(4)).map((tag) => `<span class="card__hashtag-inner">
+    <span class="card__hashtag-name">
+    #${tag}
+    </span>
+    </span>`).join(``);
+
+    return hashtegs;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+
   getTemplate() {
     return `
-    <article class="card card--${this._color} ${Object.values(this._repeatingDays).some((it) => it === true) ? `card--repeat` : `` } ${this._dueDate.toLocaleDateString() < this._today ? ` card--deadline` : ``}">
+    <article class="card card--${this._color} ${Object.values(this._repeatingDays).some((it) => it) ? `card--repeat` : `` } ${this._dueDate.toLocaleDateString() < this._today ? ` card--deadline` : ``}">
           <div class="card__form">
             <div class="card__inner">
               <div class="card__control">
@@ -59,11 +73,7 @@ export default class Task {
 
                   <div class="card__hashtag">
                     <div class="card__hashtag-list">
-                    ${Array.from(this._tags).sort(compareRandom).splice(0, getRandomValue(4)).map((tag) => `<span class="card__hashtag-inner">
-                      <span class="card__hashtag-name">
-                      #${tag}
-                      </span>
-                      </span>`).join(``)}
+                    ${this.getHashtegs()}
                     </div>
                   </div>
                 </div>
