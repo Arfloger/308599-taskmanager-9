@@ -1,6 +1,33 @@
-export const createCardEditTemplate = ({description, color}) => {
-  return `
-    <article class="card card--edit card--${color}">
+import {getRandomValue, compareRandom, createElement} from "../utils.js";
+
+export default class TaskEdit {
+  constructor({description, dueDate, tags, color, repeatingDays}) {
+    this._description = description;
+    this._dueDate = new Date(dueDate);
+    this._tags = tags;
+    this._color = color;
+    this._element = null;
+    this._repeatingDays = repeatingDays;
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return `
+    <article class="card card--edit card--${this._color} ${
+  Object.values(this._repeatingDays).some((it) => it)
+    ? `card--repeat`
+    : ``}">
     <form class="card__form" method="get">
     <div class="card__inner">
         <div class="card__control">
@@ -20,7 +47,9 @@ export const createCardEditTemplate = ({description, color}) => {
 
         <div class="card__textarea-wrap">
         <label>
-            <textarea class="card__text" placeholder="${description}" name="text">${description}</textarea>
+            <textarea class="card__text" placeholder="${
+  this._description
+}" name="text">${this._description}</textarea>
         </label>
         </div>
 
@@ -33,7 +62,7 @@ export const createCardEditTemplate = ({description, color}) => {
 
             <fieldset class="card__date-deadline" disabled="">
                 <label class="card__input-deadline-wrap">
-                <input class="card__date" type="text" placeholder="23 September" name="date">
+                <input class="card__date" type="text" placeholder="23 September" name="date" value="${this._dueDate.toDateString()} ${this._dueDate.getHours()}:${this._dueDate.getMinutes()}">
                 </label>
             </fieldset>
 
@@ -62,7 +91,19 @@ export const createCardEditTemplate = ({description, color}) => {
             </div>
 
             <div class="card__hashtag">
-            <div class="card__hashtag-list"></div>
+            <div class="card__hashtag-list">
+                    ${Array.from(this._tags)
+                      .sort(compareRandom)
+                      .splice(0, getRandomValue(4))
+                      .map(
+                          (tag) => `<span class="card__hashtag-inner">
+                      <span class="card__hashtag-name">
+                      #${tag}
+                      </span>
+                      </span>`
+                      )
+                      .join(``)}
+                </div>
 
             <label>
                 <input type="text" class="card__hashtag-input" name="hashtag-input" placeholder="Type new hashtag here">
@@ -93,6 +134,6 @@ export const createCardEditTemplate = ({description, color}) => {
         </div>
     </div>
     </form>
-  </article>
-`;
-};
+  </article>`.trim();
+  }
+}
