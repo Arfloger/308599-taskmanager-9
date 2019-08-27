@@ -10,7 +10,7 @@ import LoadMore from "./components/load-more.js";
 import Message from "./components/message.js";
 import {getTask} from "../src/data.js";
 
-let QUANTITY_CARD = 3;
+const QUANTITY_CARD = 13;
 const MAX_CARD_TO_SHOW = 8;
 const menuElement = document.querySelector(`.main__control`);
 const mainElement = document.querySelector(`.main`);
@@ -155,9 +155,7 @@ const showTasks = (tasksArr) => {
     renderMessage();
     unrender(loadMoreButtonElement);
     return;
-  }
-
-  if (tasksArr.length <= MAX_CARD_TO_SHOW) {
+  } else if (tasksArr.length <= MAX_CARD_TO_SHOW) {
     tasksArr.slice(0).map(renderTask)
     .join(``);
     unrender(loadMoreButtonElement);
