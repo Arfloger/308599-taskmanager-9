@@ -7,9 +7,10 @@ import Filter from "../src/components/filter.js";
 import Task from "./components/card.js";
 import TaskEdit from "./components/card-edit.js";
 import LoadMore from "./components/load-more.js";
+import Message from "./components/message.js";
 import {getTask} from "../src/data.js";
 
-const QUANTITY_CARD = 19;
+let QUANTITY_CARD = 3;
 const MAX_CARD_TO_SHOW = 8;
 const menuElement = document.querySelector(`.main__control`);
 const mainElement = document.querySelector(`.main`);
@@ -20,6 +21,14 @@ let tasksContainer;
 let loadMoreButtonElement;
 let tasksOnPage = 0;
 let leftCardsToRender = 0;
+
+const createBoardElelement = () => {
+  boardElement.classList.add(`board`, `container`);
+  mainElement.appendChild(boardElement);
+
+  boardTasksElement.classList.add(`board__tasks`);
+  boardElement.appendChild(boardTasksElement);
+};
 
 const onLoadMoreButtonClick = () => {
   showTasks(taskMocks);
@@ -44,6 +53,8 @@ const getFilterCounts = (taskArr, filterArr) => {
 
     filterArr.archive = task.isArchive ? filterArr.archive += 1 : filterArr.archive;
   });
+
+  filterArr.all = filterArr.all - filterArr.archive;
 
   return filterArr;
 };
@@ -87,12 +98,9 @@ const renderLoadMore = () => {
   render(boardElement, loadMore.getElement(), Position.BEFOREEND);
 };
 
-const createBoardElelement = () => {
-  boardElement.classList.add(`board`, `container`);
-  mainElement.appendChild(boardElement);
-
-  boardTasksElement.classList.add(`board__tasks`);
-  boardElement.appendChild(boardTasksElement);
+const renderMessage = () => {
+  const message = new Message();
+  render(boardTasksElement, message.getElement(), Position.BEFOREEND);
 };
 
 const renderTask = (taskMock) => {
@@ -107,37 +115,60 @@ const renderTask = (taskMock) => {
   };
 
   task.getElement()
-.querySelector(`.card__btn--edit`)
-.addEventListener(`click`, () => {
-  tasksContainer.replaceChild(taskEdit.getElement(), task.getElement());
-});
+    .querySelector(`.card__btn--edit`)
+    .addEventListener(`click`, () => {
+      tasksContainer.replaceChild(taskEdit.getElement(), task.getElement());
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
 
-  taskEdit.getElement().querySelector(`textarea`).
-addEventListener(`focus`, () => {
-  document.removeEventListener(`keydown`, onEscKeyDown);
-});
+  taskEdit.getElement().querySelector(`textarea`)
+    .addEventListener(`focus`, () => {
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    });
 
-  taskEdit.getElement().querySelector(`textarea`).
-addEventListener(`blur`, () => {
-  document.addEventListener(`keydown`, onEscKeyDown);
-});
+  taskEdit.getElement().querySelector(`textarea`)
+    .addEventListener(`blur`, () => {
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
 
   taskEdit.getElement()
-.querySelector(`.card__save`)
-.addEventListener(`click`, () => {
-  tasksContainer.replaceChild(task.getElement(), taskEdit.getElement());
-  document.removeEventListener(`keydown`, onEscKeyDown);
-});
+    .querySelector(`.card__save`)
+    .addEventListener(`click`, () => {
+      tasksContainer.replaceChild(task.getElement(), taskEdit.getElement());
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    });
 
   render(tasksContainer, task.getElement(), Position.BEFOREEND);
 };
 
 const showTasks = (tasksArr) => {
+
+  for (let i = 0; i < tasksArr.length; i++) {
+
+    if (tasksArr[i].isArchive) {
+      tasksArr.splice(i, 1);
+      i--;
+    }
+  }
+
+  if (tasksArr.length === 0) {
+    renderMessage();
+    unrender(loadMoreButtonElement);
+    return;
+  }
+
+  if (tasksArr.length <= MAX_CARD_TO_SHOW) {
+    tasksArr.slice(0).map(renderTask)
+    .join(``);
+    unrender(loadMoreButtonElement);
+    return;
+  }
+
   tasksArr.slice(tasksOnPage, tasksOnPage + MAX_CARD_TO_SHOW).map(renderTask)
   .join(``);
 
   tasksOnPage = tasksOnPage + MAX_CARD_TO_SHOW;
-  leftCardsToRender = QUANTITY_CARD - tasksOnPage;
+  leftCardsToRender = tasksArr.length - tasksOnPage;
 
   if (leftCardsToRender <= 0) {
     loadMoreButtonElement.removeEventListener(`click`, onLoadMoreButtonClick);
@@ -152,12 +183,11 @@ const init = () => {
   createBoardElelement();
   tasksContainer = document.querySelector(`.board__tasks`);
   renderLoadMore();
-
+  loadMoreButtonElement = document.querySelector(`.load-more`);
+  loadMoreButtonElement.addEventListener(`click`, onLoadMoreButtonClick);
   leftCardsToRender = taskMocks.length - tasksOnPage;
   showTasks(taskMocks);
 
-  loadMoreButtonElement = document.querySelector(`.load-more`);
-  loadMoreButtonElement.addEventListener(`click`, onLoadMoreButtonClick);
 };
 
 init();
