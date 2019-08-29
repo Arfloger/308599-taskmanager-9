@@ -7,7 +7,7 @@ import Search from "../src/components/search.js";
 import Filter from "../src/components/filter.js";
 import {getTask} from "../src/data.js";
 
-let QUANTITY_CARD = 20;
+const QUANTITY_CARD = 20;
 const menuElement = document.querySelector(`.main__control`);
 const mainElement = document.querySelector(`.main`);
 const taskMocks = new Array(QUANTITY_CARD).fill(``).map(getTask);

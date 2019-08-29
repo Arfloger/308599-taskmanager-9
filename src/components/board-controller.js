@@ -39,9 +39,7 @@ export default class BoardController {
       this._renderMessage();
       unrender(this._loadMore.getElement());
       return;
-    }
-
-    if (tasks.length <= this._MAX_CARD_TO_SHOW) {
+    } else if (tasks.length <= this._MAX_CARD_TO_SHOW) {
       tasks.slice(0).map((task) => this._renderTask(task))
       .join(``);
       unrender(this._loadMore.getElement());
