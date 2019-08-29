@@ -1,7 +1,11 @@
 import {AbstractComponent} from "../components/abstract-component.js";
 
-export class TaskList extends AbstractComponent {
+export default class TaskList extends AbstractComponent {
+  constructor() {
+    super();
+  }
+
   getTemplate() {
-    return `<div class="board__tasks"></div>`;
+    return `<div class="board__tasks"></div>`.trim();
   }
 }
