@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 import {Position} from "../const.js";
-<<<<<<< HEAD
 import {render, unrender} from "../utils.js";
 import Board from "./board.js";
 import TaskList from "./task-list.js";
@@ -14,28 +12,16 @@ export default class BoardController {
     this._MAX_CARD_TO_SHOW = 8;
     this._tasksOnPage = 0;
     this._leftCardsToRender = 0;
-=======
-import {render} from "../utils.js";
-import Board from "../components/board.js";
-import TaskList from "../components/task-list.js";
-
-export default class BoardController {
-  constructor(container, tasks) {
->>>>>>> 577aadb6f275eed5991445e416b3a5bdcb35257b
     this._container = container;
     this._tasks = tasks;
     this._board = new Board();
     this._taskList = new TaskList();
-<<<<<<< HEAD
     this._loadMore = new LoadMore();
-=======
->>>>>>> 577aadb6f275eed5991445e416b3a5bdcb35257b
   }
 
   init() {
     render(this._container, this._board.getElement(), Position.BEFOREEND);
     render(this._board.getElement(), this._taskList.getElement(), Position.BEFOREEND);
-<<<<<<< HEAD
     this._leftCardsToRender = this._tasks.length - this._tasksOnPage;
     this._renderLoadMore();
     this._showTasks(this._tasks);
@@ -139,9 +125,5 @@ export default class BoardController {
     this._loadMore.getElement().addEventListener(`click`, () => {
       this._showTasks(this._tasks);
     });
-=======
->>>>>>> 577aadb6f275eed5991445e416b3a5bdcb35257b
   }
 }
-=======
->>>>>>> d6070a58c96e535d02640bd6e070b356dcc269f6
