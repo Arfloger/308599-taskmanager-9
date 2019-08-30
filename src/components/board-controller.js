@@ -4,6 +4,7 @@ import Board from "./board.js";
 import TaskList from "./task-list.js";
 import Message from "./message.js";
 import Task from "./card.js";
+import Sort from "./sort.js";
 import TaskEdit from "./card-edit.js";
 import LoadMore from "./load-more.js";
 
@@ -15,6 +16,7 @@ export default class BoardController {
     this._container = container;
     this._tasks = tasks;
     this._board = new Board();
+    this._sort = new Sort();
     this._taskList = new TaskList();
     this._loadMore = new LoadMore();
   }
@@ -22,9 +24,12 @@ export default class BoardController {
   init() {
     render(this._container, this._board.getElement(), Position.BEFOREEND);
     render(this._board.getElement(), this._taskList.getElement(), Position.BEFOREEND);
+    render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
     this._leftCardsToRender = this._tasks.length - this._tasksOnPage;
     this._renderLoadMore();
     this._showTasks(this._tasks);
+    this._sort.getElement()
+    .addEventListener(`click`, (evt) => this._onSortLinkClick(evt));
   }
 
   _showTasks(tasks) {
@@ -110,6 +115,33 @@ export default class BoardController {
       });
 
     render(this._taskList.getElement(), taskComponent.getElement(), Position.BEFOREEND);
+  }
+
+  _onSortLinkClick(evt) {
+    evt.preventDefault();
+
+    if (evt.target.tagName !== `A`) {
+      return;
+    }
+
+    this._taskList.getElement().innerHTML = ``;
+    this._renderLoadMore();
+    this._tasksOnPage = 0;
+    this._leftCardsToRender = 0;
+
+    switch (evt.target.dataset.sortType) {
+      case `date-up`:
+        const sortedByDateUpTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        this._showTasks(sortedByDateUpTasks);
+        break;
+      case `date-down`:
+        const sortedByDateDownTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        this._showTasks(sortedByDateDownTasks);
+        break;
+      case `default`:
+        this._showTasks(this._tasks);
+        break;
+    }
   }
 
   _renderMessage() {
