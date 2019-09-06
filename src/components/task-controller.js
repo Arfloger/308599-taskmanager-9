@@ -1,4 +1,4 @@
-import {Position} from "../const.js";
+import {Position, Keycode} from "../const.js";
 import {render} from "../utils.js";
 import Task from "./card.js";
 import TaskEdit from "./card-edit.js";
@@ -16,7 +16,7 @@ export default class TaskController {
 
   init() {
     const onEscKeyDown = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
+      if (evt.keyCode === Keycode.ESC) {
         this._container
           .getElement()
           .replaceChild(

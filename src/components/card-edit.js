@@ -1,4 +1,5 @@
 import {AbstractComponent} from "../components/abstract-component.js";
+import {Keycode} from "../const.js";
 
 export default class TaskEdit extends AbstractComponent {
   constructor({description, dueDate, tags, color, repeatingDays, isFavorite, isArchive, isRepeating, isDate}) {
@@ -151,8 +152,8 @@ export default class TaskEdit extends AbstractComponent {
 
     const repeatCheckboxElements = this.getElement().querySelectorAll(`.card__repeat-day-input`);
     const repeatingDays = Object.values(this._repeatingDays);
-    repeatingDays.map((isRepeat, index) => {
-      isRepeat ? repeatCheckboxElements[index].checked = true : ``;
+    repeatingDays.forEach((isRepeat, index) => {
+      repeatCheckboxElements[index].checked = isRepeat;
     });
   }
 
@@ -162,7 +163,7 @@ export default class TaskEdit extends AbstractComponent {
 
     this.getElement()
         .querySelector(`.card__hashtag-input`).addEventListener(`keydown`, (evt) => {
-          if (evt.key === `Enter`) {
+          if (evt.keyCode === Keycode.ENTER) {
             evt.preventDefault();
             this.getElement().querySelector(`.card__hashtag-list`).insertAdjacentHTML(`beforeend`, `<span class="card__hashtag-inner">
         <input
@@ -182,7 +183,7 @@ export default class TaskEdit extends AbstractComponent {
           }
         });
 
-    (document).addEventListener(`click`, (evt) => {
+    document.addEventListener(`click`, (evt) => {
       if (evt.target.classList.contains(`card__hashtag-delete`)) {
         evt.preventDefault();
         evt.target.closest(`.card__hashtag-inner`).remove();
