@@ -1,19 +1,21 @@
-import {getRandomValue, compareRandom} from "../utils.js";
 import {AbstractComponent} from "../components/abstract-component.js";
 
 export default class Task extends AbstractComponent {
-  constructor({description, dueDate, tags, color, repeatingDays}) {
+  constructor({description, dueDate, tags, color, repeatingDays, isFavorite, isArchive, isDate}) {
     super();
     this._description = description;
     this._dueDate = new Date(dueDate);
     this._tags = tags;
     this._color = color;
+    this._isArchive = isArchive;
+    this._isFavorite = isFavorite;
     this._repeatingDays = repeatingDays;
+    this._isDate = isDate;
     this._today = new Date().toLocaleDateString();
   }
 
   getHashtegs() {
-    const hashtegs = Array.from(this._tags).sort(compareRandom).splice(0, getRandomValue(4)).map((tag) => `<span class="card__hashtag-inner">
+    const hashtegs = Array.from(this._tags).map((tag) => `<span class="card__hashtag-inner">
     <span class="card__hashtag-name">
     #${tag}
     </span>
@@ -24,17 +26,19 @@ export default class Task extends AbstractComponent {
 
   getTemplate() {
     return `
-    <article class="card card--${this._color} ${Object.values(this._repeatingDays).some((it) => it) ? `card--repeat` : `` } ${this._dueDate.toLocaleDateString() < this._today ? ` card--deadline` : ``}">
+    <article class="card card--${this._color} ${Object.values(this._repeatingDays).some((it) => it) ? `card--repeat` : `` } ${this._dueDate.toLocaleDateString() < this._today && this._isDate ? ` card--deadline` : ``}">
           <div class="card__form">
             <div class="card__inner">
               <div class="card__control">
                 <button type="button" class="card__btn card__btn--edit">
                   edit
                 </button>
-                <button type="button" class="card__btn card__btn--archive">
+                <button type="button" 
+                class="card__btn card__btn--archive ${this._isArchive ? ` card__btn--disabled` : ``}">
                   archive
                 </button>
-                <button type="button" class="card__btn card__btn--favorites card__btn--disabled">
+                <button type="button" class="card__btn card__btn--favorites 
+                ${this._isFavorite ? ` card__btn--disabled` : ``}">
                   favorites
                 </button>
               </div>
@@ -54,8 +58,11 @@ export default class Task extends AbstractComponent {
                   <div class="card__dates">
                     <div class="card__date-deadline">
                       <p class="card__input-deadline-wrap">
-                        <span class="card__date">${this._dueDate.toDateString()}</span>
-                        <span class="card__time">${this._dueDate.getHours()}:${this._dueDate.getMinutes()}</span>
+                        <span class="card__date">${this._isDate ? this._dueDate.toDateString() : ``}</span>
+                        <span class="card__time">
+                        ${this._isDate ? this._dueDate.getHours() : ``}
+                        ${this._isDate ? `:` : ``}
+                        ${this._isDate ? this._dueDate.getMinutes() : ``}</span>
                       </p>
                     </div>
                   </div>
